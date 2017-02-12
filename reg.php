@@ -1,14 +1,21 @@
 <?php
+    
+    /* 
+        Класс для регистрации пользователя и проверки соответствия введенных данных  
+    */
 
     class RegistrationManager {
 
+        // Минимальное время через которое можно регистрировать пользователя с одного IP
         const REGISTRATION_TIME = '20';
 
+        // Задаем длину для логина
         private $maxLoginLength = 30;
         private $minLoginLength = 3;
 
         private $db;
 
+        // Вывод информации
         public $messages = [];
 
 
@@ -25,9 +32,10 @@
             $birth = $data['birth'];
             $ip = $_SERVER['REMOTE_ADDR'];
             
-
+            // Проверка всех выполненных условий 
             if (!$this->allowRegistration($login)) return false;
 
+            // Вносим нового пользователя в базу
             $result = $this->db->query("INSERT INTO users VALUES (?n, '?s', '?s', '?n', INET_ATON('?s'), '?s', '?s', '?i')", null, $login, $password, null, $ip, $name, $birth, time());
 
             if ($result) {
@@ -38,7 +46,8 @@
             }
         }   
 
-        private function isExist($login) {
+        // Проверка на занятость логина
+        private function isExist($login) { 
             $data = $this->db->query("SELECT id FROM users WHERE login = '?s'", $login);
             if ($data->getNumRows() > 0) {
                 $this->messages[] = "Пользователь с таким логином уже существует в базе данных";
@@ -48,6 +57,7 @@
             }
         }
 
+        // Проверка на длину логина
         private function hasCorrectLength($login) {
             $loginLength = strlen($login);
             if ($loginLength < $this->minLoginLength || $loginLength > $this->maxLoginLength) {
@@ -58,6 +68,7 @@
             }
         } 
 
+        // Проверка на допустимые символы 
         private function hasCorrectSymbols($login) {
             if (!preg_match("/^[a-zA-Z0-9]+$/",$login)) {
                 $this->messages[] = "Логин может состоять только из букв английского алфавита и цифр";
@@ -67,6 +78,7 @@
             }
         }
 
+        // Полная проверка соответствия логина 
         private function allowRegistration($login) {
 
             $this->hasCorrectLength($login);

@@ -1,9 +1,11 @@
 <?php 
-    ini_set("display_errors", 1);
-    error_reporting(E_ALL);
+    /*
+        Скрипт отвечает за проверку введенной пары логин/пароль 
+    */
     
     require_once('db.php');
 
+    //Метод для генеририрования хеш
     function generateCode($length=6) {
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHI JKLMNOPRQSTUVWXYZ0123456789";
         $code = "";
@@ -18,7 +20,10 @@
     
     if (isset($_POST['login']) && isset($_POST['password'])) {
 
+        //Выдергиваем строку с указанным логином
         $data = $db->query("SELECT id, password FROM users WHERE login='?s' LIMIT 1", $_POST['login'])->fetch_assoc();
+
+        //Сравниваем пароли 
         if ($data['password'] === md5(md5($_POST['password']))) {
 
             //Генерируем случайное число и шифруем его
@@ -35,5 +40,4 @@
         } else {
             print "Вы ввели неправильный логин или пароль.";
         }
-
     }
